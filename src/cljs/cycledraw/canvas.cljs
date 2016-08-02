@@ -22,6 +22,8 @@
                   :canvas []
                   :current-frame 0}))
 
+(defn parse-color [{r :r g :g b :b}] (str "rgb(" r "," g "," b ")"))
+
 (defn generate-default-pallette [{pallette-size :pallette-size}]
   (map #({:r %1 :g %1 :b %1}) (range 0 pallette-size)))
 
@@ -58,4 +60,50 @@
                                                                          tool ((get selected-tool tools) selected-color-id canvas)]
                                                                      (render selected-canvas selected-pallette item-renderer row-renderer tool)))
 
-(defn canvas-page [] (let [initialized-work (initialize! work)] (fn [] (renderize-canvas initialized-work item-renderer row-renderer app tools))))
+(defn canvas-page [work app] (let [initialized-work (initialize! work)] (fn [] (renderize-canvas initialized-work item-renderer row-renderer app tools))))
+
+
+(defn color-selector [selected-color-id work app] (let [clicked (atom false)
+                                                        switch-back (fn [] (js/setTimeout (fn [] (swap! clicked (fn [_] false))) 300))
+                                                        switch (fn [_] (swap! clicked (fn [_] true)) (switch-back))]
+                                                    (fn [color color-id]
+                                                      [:div.selector {:class (when (= color-id selected-color-id) "selected")}
+                                                       [:input {:type "color" :value (parse-color color)}]
+                                                       (when (not @clicked) [:div.selectee {:on-click switch}])])))
+
+(defn color-manager [work app] (let [ {current-pallete-frame :current-pallete-frame
+                                       palletes :pallettes} work
+                                      {selected-color-id :selected-color-id app}
+                                      color (nth selected-color-id (nth current-pallette-frame selected-pallette))
+                                      ] [:div.color-indicator {:style (str "background-color:" (parse-color color))}]))
+
+(defn pallete-manager [work app] (fn [] (let [{selected-colorid :selected-color-id} app
+                                              {palletes :pallettes
+                                               current-pallette-frame :current-pallette-frame} work
+                                              colors (nth current-pallette-frame palletes)]
+                                          (map (color-selector selected-color-id work app) colors))))
+
+(defn tool-manager [work app] (fn [] [:button.selected "pencil"]))
+
+(defn pallette-frame-manager [work app] (let [{current-pallete-frame :current-pallete-frame } app
+                                              next-pallette-frame (fn [] )
+                                              previous-pallette-frame (fn [] )]
+                                          (fn [] [:div
+                                                  [:button {:on-click previous-pallette-frame}]
+                                                  [:span current-pallete-frame]
+                                                  [:button {:on-click next-pallette-frame}]])))
+
+(defn canvas-frame-manager [work app] (fn [] ))
+
+(defn canvas-ui [] (fn [] [:main
+                           [:header]
+                           [:nav]
+                           [:section
+                            [:article [canvas-page work app]]
+                            [:aside
+                             [:div.colors [color-manager work app]]
+                             [:div.tools [tool-manager work app]]
+                             [:div.pallette [pallete-manager work app]]]]
+                           [:footer
+                            [:div.pallete-frame [pallete-frame-manager work app]]
+                            [:div.canvas.frame [canvas-frame-manager work app]]]]))
