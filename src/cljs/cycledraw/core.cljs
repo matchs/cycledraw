@@ -3,13 +3,13 @@
               [reagent.session :as session]
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]
-              [cycledraw.canvas :refer [canvas-page]]))
+              [cycledraw.canvas :refer [canvas-ui]]))
 
 ;; -------------------------
 ;; Views
 
 (defn home-page []
-  [canvas-page])
+  [canvas-ui])
 
 (defn about-page []
   [:div [:h2 "About cycledraw"]

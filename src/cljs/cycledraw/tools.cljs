@@ -1,4 +1,4 @@
 (ns cycledraw.tools
   (:require [reagent.core :as reagent :refer [atom]]))
 
-(def pencil [selected-color-id canvas] (fn [x y color-id] (swap! canvas update-in[x y] (fn [_] selected-color-id))))
+(defn pencil [selected-color-id canvas] (fn [x y color-id] (swap! canvas update-in[x y] (fn [_] selected-color-id))))
