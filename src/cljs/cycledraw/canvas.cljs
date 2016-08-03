@@ -1,7 +1,12 @@
 (ns cycledraw.canvas
   (:require [reagent.core :as reagent :refer [atom]]
             [cycledraw.tools :as tools]
-            [cycledraw.components :refer all]))
+            [cycledraw.components :refer [color-selector
+                                          color-manager
+                                          pallette-manager
+                                          tool-manager
+                                          pallette-frame-manager
+                                          canvas-frame-manager]]))
 
 (def tools {
              :pencil tools/pencil
@@ -22,24 +27,22 @@
                   :bitmap []
                   :current-frame 0}))
 
-(defn parse-color [{r :r g :g b :b}] (str "rgb(" r "," g "," b ")"))
-
 (defn generate-default-pallette [{pallette-size :pallette-size}]
   (map #({:r %1 :g %1 :b %1}) (range 0 pallette-size)))
 
 
 (defn generate-default-bitmap [{{width :width height :height} :resolution
                              pallette-size :pallette-size}]
-  (map #([map #({:color-id 0}) (range 0 width)]) (range 0 height)))
+  (map #([map (fn [] {:color-id 0}) (range 0 width)]) (range 0 height)))
 
-(defn new-pallette! [work frame generate-pallete]
-  (swap! work update-in [:pallettes frame] (generate-pallete work)))
+(defn new-pallette! [work frame generate-pallette]
+  (swap! work update-in [:pallettes frame] (generate-pallette work)))
 
 (defn new-bitmap! [work frame generate-bitmap]
   (swap! work update-in [:bitmap frame] (generate-bitmap work)))
 
 (defn initialize! [work]
-   (let [ref-work @work]  (new-pallette! refwork 0 generate-default-pallette)
+   (let [ref-work @work]  (new-pallette! ref-work 0 generate-default-pallette)
                           (new-bitmap! ref-work 0 generate-default-bitmap)
                           work))
 
@@ -63,7 +66,7 @@
          current-pallette-frame :current-pallette-frame
          bitmap :bitmap
          current-frame :current-frame} work
-        selected-pallette (nth current-pallette-frame pallette)
+        selected-pallette (nth current-pallette-frame pallettes)
         selected-bitmap (nth current-frame bitmap)
         {selected-tool :selected-tool
          selected-color-id :selected-color-id} app
@@ -83,7 +86,7 @@
                             [:aside
                              [:div.colors [color-manager work app]]
                              [:div.tools [tool-manager work app]]
-                             [:div.pallette [pallete-manager work app]]]]
+                             [:div.pallette [pallette-manager work app]]]]
                            [:footer
-                            [:div.pallete-frame [pallete-frame-manager work app]]
+                            [:div.pallette-frame [pallette-frame-manager work app]]
                             [:div.canvas.frame [canvas-frame-manager work app]]]]))

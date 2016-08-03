@@ -110,13 +110,14 @@
                                   [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
                                   [speclj "3.3.1"]
                                   [devcards "0.2.1-7"]
+                                  [binaryage/devtools "0.8.0"]
                                   [pjstadig/humane-test-output "0.8.0"]
                                   ]
 
                    :source-paths ["env/dev/clj"]
                    :plugins [[lein-figwheel "0.5.4-5"]
                              [speclj "3.3.1"]
-                             
+
                              [lein-sassy "1.0.7"]]
 
                    :injections [(require 'pjstadig.humane-test-output)
